@@ -4,6 +4,7 @@ import ChatFlow from "./components/ChatFlow";
 import SaveFlow from "./components/SaveFlow";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { ToastContainer } from "react-toastify";
 import "./App.css";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           />
           <NodesPanel />
         </div>
+        <ToastContainer />
       </DndProvider>
     </React.Fragment>
   );

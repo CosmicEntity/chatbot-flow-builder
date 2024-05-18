@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   applyNodeChanges,
   applyEdgeChanges,
@@ -10,6 +10,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { useDrop } from "react-dnd";
 import useChatFlowStore from "../store/ChatFlowStore";
+import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import TextNode from "../node types/TextNode";
 
@@ -32,29 +35,66 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
     accept: "text",
     drop: (item, monitor) => {
       const clientOffset = monitor.getClientOffset();
-      setNodes((prevNodes) => [
-        ...prevNodes,
-        {
-          id: Math.random().toString(),
-          type: "text",
-          position: {
-            x: clientOffset.x,
-            y: clientOffset.y,
+      setNodes((prevNodes) => {
+        if (prevNodes.length === 0) {
+          return [
+            {
+              id: uuidv4(),
+              type: "text",
+              position: {
+                x: clientOffset.x,
+                y: clientOffset.y,
+              },
+              data: { label: "Click to Edit Message", incomingEdge: true },
+            },
+          ];
+        }
+
+        return [
+          ...prevNodes,
+          {
+            id: uuidv4(),
+            type: "text",
+            position: {
+              x: clientOffset.x,
+              y: clientOffset.y,
+            },
+            data: { label: "Click to Edit Message" },
           },
-          data: { label: "Click to Edit Message" },
-        },
-      ]);
+        ];
+      });
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   }));
 
-  if (isSaveClicked) {
-    updateNodes(nodes);
-    updateEdges(edges);
-    setIsSaveClicked(false);
-  }
+  useEffect(() => {
+    if (isSaveClicked) {
+      let allNodesConnected = true;
+      nodes.forEach((node) => {
+        if (!node.data.incomingEdge) {
+          allNodesConnected = false;
+          return;
+        }
+      });
+
+      if (!allNodesConnected) {
+        toast.error("Node(s) not connected", {
+          position: "top-center",
+        });
+        setIsSaveClicked(false);
+      } else {
+        toast.success("Changes saved successfully", {
+          position: "top-center",
+        });
+
+        updateNodes(nodes);
+        updateEdges(edges);
+        setIsSaveClicked(false);
+      }
+    }
+  }, [isSaveClicked]);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -70,7 +110,7 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
     (params) => {
       // Check if the target node already has an incoming edge;
       const targetNode = nodes.find((node) => node.id === params.target);
-      console.log(targetNode);
+
       // If the target node already has an incoming edge, return early to prevent multiple sources
       if (targetNode.data.incomingEdge) {
         return;
