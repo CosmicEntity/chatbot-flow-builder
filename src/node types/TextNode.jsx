@@ -3,10 +3,10 @@ import MessageIcon from "../assets/icons/message.svg";
 import WhatsappIcon from "../assets/icons/whatsapp.svg";
 import { Handle, Position } from "reactflow";
 
-const TextNode = ({ isConnectable, data }) => {
+const TextNode = ({ data }) => {
   return (
     <div>
-      <Handle type="target" position={Position.Left} isConnectable />
+      <Handle type="target" position={Position.Left} />
       <div className=" w-[250px] shadow-2xl rounded-md">
         <div className="h-6 bg-green-200 rounded-t-md flex justify-between">
           <h3 className="text-sm font-bold">
@@ -22,10 +22,10 @@ const TextNode = ({ isConnectable, data }) => {
           </div>
         </div>
         <div className=" h-10 bg-white rounded-b-md overflow-y-scroll">
-          <p className="mx-2 text-sm">{data.label}</p>
+          <p className="mx-2 text-sm">{data.content}</p>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} isConnectable />
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 };

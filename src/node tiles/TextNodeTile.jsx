@@ -12,20 +12,20 @@ const TextNodeTile = () => {
     }),
   }));
 
-  const svgRef = useRef(null);
+  //------------------------ Tile Hover Effect-----------------------------------------------------
 
+  const svgRef = useRef(null);
   const handleMouseEnter = () => {
     if (svgRef.current) {
       svgRef.current.style.stroke = "#60A5FA";
     }
   };
-
   const handleMouseLeave = () => {
     if (svgRef.current) {
       svgRef.current.style.stroke = "#93C5FD";
     }
   };
-
+  // -----------------------------------------------------------------------------------------------------
   return (
     <div
       className="h-16 w-32 m-2 border-2 border-blue-300 rounded-md flex flex-col justify-center items-center hover:cursor-pointer node-tile bg-white"

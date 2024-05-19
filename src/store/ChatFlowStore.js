@@ -5,11 +5,6 @@ import { devtools, persist } from "zustand/middleware";
 const chatFlowStore = (set) => ({
   nodesList: [],
   edgesList: [],
-  addNode: (node) => {
-    set((state) => ({
-      nodesList: [...state.nodesList, node],
-    }));
-  },
   updateNodes: (nodes) => {
     set(() => ({
       nodesList: nodes,

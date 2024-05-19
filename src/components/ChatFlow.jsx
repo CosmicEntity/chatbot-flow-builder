@@ -18,15 +18,21 @@ import TextNode from "../node types/TextNode";
 
 const nodeTypes = { text: TextNode };
 
-const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
-  const { nodesList, edgesList, addNode, updateNodes, updateEdges } =
-    useChatFlowStore((state) => ({
+const ChatFlow = ({
+  isSaveClicked,
+  setIsSaveClicked,
+  setShowSettings,
+  nodeData,
+  setNodeData,
+}) => {
+  const { nodesList, edgesList, updateNodes, updateEdges } = useChatFlowStore(
+    (state) => ({
       nodesList: state.nodesList,
       edgesList: state.edgesList,
-      addNode: state.addNode,
       updateNodes: state.updateNodes,
       updateEdges: state.updateEdges,
-    }));
+    })
+  );
 
   const [nodes, setNodes] = useState(nodesList);
   const [edges, setEdges] = useState(edgesList);
@@ -45,7 +51,11 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
                 x: clientOffset.x,
                 y: clientOffset.y,
               },
-              data: { label: "Click to Edit Message", incomingEdge: true },
+              data: {
+                label: "Message",
+                content: "Placeholder Text",
+                incomingEdge: true,
+              },
             },
           ];
         }
@@ -59,7 +69,7 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
               x: clientOffset.x,
               y: clientOffset.y,
             },
-            data: { label: "Click to Edit Message" },
+            data: { label: "Message", content: "Placeholder Text" },
           },
         ];
       });
@@ -82,11 +92,19 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
       if (!allNodesConnected) {
         toast.error("Node(s) not connected", {
           position: "top-center",
+          autoClose: 3000,
+          pauseOnHover: false,
+          hideProgressBar: true,
+          theme: "colored",
         });
         setIsSaveClicked(false);
       } else {
         toast.success("Changes saved successfully", {
           position: "top-center",
+          autoClose: 3000,
+          pauseOnHover: false,
+          hideProgressBar: true,
+          theme: "colored",
         });
 
         updateNodes(nodes);
@@ -95,6 +113,10 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
       }
     }
   }, [isSaveClicked]);
+
+  useEffect(() => {
+    setNodes(nodesList);
+  }, [nodesList]);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -145,6 +167,10 @@ const ChatFlow = ({ isSaveClicked, setIsSaveClicked }) => {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         preventScrolling={false}
+        onNodeClick={(e, node) => {
+          setNodeData(node);
+          setShowSettings(true);
+        }}
         ref={drop}
       >
         <Controls />
