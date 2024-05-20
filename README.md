@@ -1,8 +1,35 @@
-# React + Vite
+# Chat Flow Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a chat flow builder built with React and Vite. It uses React DnD for drag and drop functionality and React Flow for the chat flow visualization along with Zustand to persist state in local storage.
 
-Currently, two official plugins are available:
+## Installation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Clone the repository: `git clone https://github.com/CosmicEntity/chatbot-flow-builder`
+2. Install the dependencies: `npm install`
+
+## Usage
+
+1. Start the development server: `npm run dev`
+2. Open your browser and visit `http://localhost:3000`
+
+## Features
+
+- Drag and drop functionality for creating and rearranging chat flow nodes
+- Visualization of chat flow nodes using React Flow
+- Toast notifications for user feedback
+
+## Dependencies
+
+- React: ^18.2.0
+- React DnD: ^16.0.1
+- React DnD HTML5 Backend: ^16.0.1
+- React DOM: ^18.2.0
+- React SVG: ^16.1.34
+- React Toastify: ^10.0.5
+- React Flow: ^11.11.3
+- UUID: ^9.0.1
+- Zustand: ^4.5.2
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

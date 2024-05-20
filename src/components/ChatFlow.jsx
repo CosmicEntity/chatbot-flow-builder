@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactFlow, {
   applyNodeChanges,
   applyEdgeChanges,
@@ -6,6 +6,7 @@ import ReactFlow, {
   Background,
   MarkerType,
   Controls,
+  useViewport,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useDrop } from "react-dnd";
@@ -16,15 +17,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 import TextNode from "../node types/TextNode";
 
-const nodeTypes = { text: TextNode };
+const nodeTypes = { text: TextNode }; //Custom Node Type Registration
 
 const ChatFlow = ({
   isSaveClicked,
   setIsSaveClicked,
   setShowSettings,
-  nodeData,
+  setNodesData,
   setNodeData,
 }) => {
+  //Fetching State from Zustand Store
   const { nodesList, edgesList, updateNodes, updateEdges } = useChatFlowStore(
     (state) => ({
       nodesList: state.nodesList,
@@ -34,13 +36,29 @@ const ChatFlow = ({
     })
   );
 
+  const { x, y, zoom } = useViewport(); //Viewport State to get origin of reactflow component
+  const xRef = useRef(x);
+  const yRef = useRef(y);
+  const zoomRef = useRef(zoom);
+
   const [nodes, setNodes] = useState(nodesList);
   const [edges, setEdges] = useState(edgesList);
 
+  //Dropping Text Nodes in ReactFlow
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "text",
     drop: (item, monitor) => {
+      //----------------node position calculation inside reactflow-------------------
       const clientOffset = monitor.getClientOffset();
+      const bounds = reactFlowRef.current.getBoundingClientRect();
+      const currentX = xRef.current;
+      const currentY = yRef.current;
+      const currentZoom = zoomRef.current;
+      const zoomAdjustedClientX = (clientOffset.x - bounds.left) / currentZoom;
+      const zoomAdjustedClientY = (clientOffset.y - bounds.top) / currentZoom;
+      let zoomAdjustedX = -currentX / currentZoom;
+      let zoomAdjustedY = -currentY / currentZoom;
+      //------------- -----------------------------------------------------------
       setNodes((prevNodes) => {
         if (prevNodes.length === 0) {
           return [
@@ -48,8 +66,8 @@ const ChatFlow = ({
               id: uuidv4(),
               type: "text",
               position: {
-                x: clientOffset.x,
-                y: clientOffset.y,
+                x: zoomAdjustedX + zoomAdjustedClientX,
+                y: zoomAdjustedY + zoomAdjustedClientY,
               },
               data: {
                 label: "Message",
@@ -66,8 +84,8 @@ const ChatFlow = ({
             id: uuidv4(),
             type: "text",
             position: {
-              x: clientOffset.x,
-              y: clientOffset.y,
+              x: zoomAdjustedX + zoomAdjustedClientX,
+              y: zoomAdjustedY + zoomAdjustedClientY,
             },
             data: { label: "Message", content: "Placeholder Text" },
           },
@@ -79,9 +97,18 @@ const ChatFlow = ({
     }),
   }));
 
+  //To get latest position of pointer inside drop area
+  useEffect(() => {
+    xRef.current = x;
+    yRef.current = y;
+    zoomRef.current = zoom;
+  }, [x, y, zoom]);
+
+  //To check if all nodes are connected & save the state
   useEffect(() => {
     if (isSaveClicked) {
       let allNodesConnected = true;
+
       nodes.forEach((node) => {
         if (!node.data.incomingEdge) {
           allNodesConnected = false;
@@ -114,10 +141,14 @@ const ChatFlow = ({
     }
   }, [isSaveClicked]);
 
+  //To update state when nodes are edited in settings panel
   useEffect(() => {
     setNodes(nodesList);
   }, [nodesList]);
 
+  const reactFlowRef = useRef(null);
+
+  //-----------------------reactflow utility functions to change state of nodes and edges--------------------------
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
@@ -156,10 +187,12 @@ const ChatFlow = ({
     },
     [nodes, edges, setEdges]
   );
+  //--------------------------------------------------------------------------------------------------------------
 
   return (
-    <div style={{ width: "80vw", height: "94vh" }}>
+    <div style={{ width: "80vw", height: "94vh" }} ref={reactFlowRef}>
       <ReactFlow
+        ref={drop}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -168,10 +201,10 @@ const ChatFlow = ({
         nodeTypes={nodeTypes}
         preventScrolling={false}
         onNodeClick={(e, node) => {
+          setNodesData(nodes);
           setNodeData(node);
           setShowSettings(true);
         }}
-        ref={drop}
       >
         <Controls />
         <Background variant="dots" gap={12} size={1} />

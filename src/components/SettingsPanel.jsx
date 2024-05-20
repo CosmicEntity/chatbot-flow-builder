@@ -6,6 +6,7 @@ import { ReactSVG } from "react-svg";
 
 const SettingsPanel = ({
   nodeData,
+  nodesData,
   setShowSettings,
   isSaveClicked,
   setIsSaveClicked,
@@ -13,8 +14,7 @@ const SettingsPanel = ({
   const [message, setMessage] = useState(nodeData?.data?.content);
   const [updatedNodes, setUpdatedNodes] = useState([]);
 
-  const { nodesList, updateNodes } = useChatFlowStore((state) => ({
-    nodesList: state.nodesList,
+  const { updateNodes } = useChatFlowStore((state) => ({
     updateNodes: state.updateNodes,
   }));
 
@@ -22,6 +22,7 @@ const SettingsPanel = ({
     if (isSaveClicked) {
       updateNodes(updatedNodes);
       setIsSaveClicked(false);
+      setShowSettings(false);
     }
   }, [isSaveClicked]);
 
@@ -29,7 +30,7 @@ const SettingsPanel = ({
 
   const handleNodeUpdate = () => {
     setUpdatedNodes(
-      nodesList.map((node) => {
+      nodesData.map((node) => {
         if (node.id === nodeData.id) {
           return {
             ...node,
@@ -89,7 +90,7 @@ const SettingsPanel = ({
       </div>
       <div className="h-[20vh] border-b border-gray-300 flex flex-col justify-center items-center">
         <label htmlFor="message" className="text-sm text-gray-400 w-[80%] mb-1">
-          Text:
+          Text: <i>(Press Tab to Save)</i>
         </label>
         <textarea
           id="message"
