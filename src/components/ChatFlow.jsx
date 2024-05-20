@@ -60,24 +60,6 @@ const ChatFlow = ({
       let zoomAdjustedY = -currentY / currentZoom;
       //------------- -----------------------------------------------------------
       setNodes((prevNodes) => {
-        if (prevNodes.length === 0) {
-          return [
-            {
-              id: uuidv4(),
-              type: "text",
-              position: {
-                x: zoomAdjustedX + zoomAdjustedClientX,
-                y: zoomAdjustedY + zoomAdjustedClientY,
-              },
-              data: {
-                label: "Message",
-                content: "Placeholder Text",
-                incomingEdge: true,
-              },
-            },
-          ];
-        }
-
         return [
           ...prevNodes,
           {
@@ -87,7 +69,12 @@ const ChatFlow = ({
               x: zoomAdjustedX + zoomAdjustedClientX,
               y: zoomAdjustedY + zoomAdjustedClientY,
             },
-            data: { label: "Message", content: "Placeholder Text" },
+            data: {
+              label: "Message",
+              content: "Placeholder Text",
+              incomingEdge: null,
+              outgoingEdge: null,
+            },
           },
         ];
       });
@@ -110,7 +97,7 @@ const ChatFlow = ({
       let allNodesConnected = true;
 
       nodes.forEach((node) => {
-        if (!node.data.incomingEdge) {
+        if (!node.data.incomingEdge && !node.data.outgoingEdge) {
           allNodesConnected = false;
           return;
         }
@@ -162,14 +149,24 @@ const ChatFlow = ({
   const onConnect = useCallback(
     (params) => {
       // Check if the target node already has an incoming edge;
+      const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
-      // If the target node already has an incoming edge, return early to prevent multiple sources
-      if (targetNode.data.incomingEdge) {
+      // If the source node already has an outgoing edge or slef loop, don't allow the connection
+      if (sourceNode.data.outgoingEdge || sourceNode === targetNode) {
+        return;
+      }
+      //if looping around to node that is above in heirarchy
+      const loopedEdge = edges.find(
+        (edge) => edge.source === params.target && edge.target === params.source
+      );
+
+      if (loopedEdge) {
         return;
       }
 
-      // Set the incomingEdge property for the target node
+      // Set the outgoingEdge property for the target node
+      sourceNode.data.outgoingEdge = true;
       targetNode.data.incomingEdge = true;
 
       setEdges((eds) =>
@@ -205,6 +202,10 @@ const ChatFlow = ({
           setNodeData(node);
           setShowSettings(true);
         }}
+        onPaneClick={() => {
+          setShowSettings(false);
+        }}
+        deleteKeyCode={null}
       >
         <Controls />
         <Background variant="dots" gap={12} size={1} />
