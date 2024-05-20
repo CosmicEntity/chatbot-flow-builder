@@ -148,15 +148,15 @@ const ChatFlow = ({
 
   const onConnect = useCallback(
     (params) => {
-      // Check if the target node already has an incoming edge;
+      // Check if the source node already has an outgoing edge;
       const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
-      // If the source node already has an outgoing edge or slef loop, don't allow the connection
+      // If the source node already has an outgoing edge or edge creating a slef loop, don't allow the connection
       if (sourceNode.data.outgoingEdge || sourceNode === targetNode) {
         return;
       }
-      //if looping around to node that is above in heirarchy
+      //if looping around to node that is ancestor of the source node don't allow connection
       const loopedEdge = edges.find(
         (edge) => edge.source === params.target && edge.target === params.source
       );
