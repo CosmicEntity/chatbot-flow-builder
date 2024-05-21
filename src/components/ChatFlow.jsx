@@ -165,7 +165,7 @@ const ChatFlow = ({
         return;
       }
 
-      // Set the outgoingEdge property for the target node
+      // Set the outgoingEdge property for the source node and incomingEdge property for target node
       sourceNode.data.outgoingEdge = true;
       targetNode.data.incomingEdge = true;
 
